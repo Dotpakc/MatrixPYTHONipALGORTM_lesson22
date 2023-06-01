@@ -15,12 +15,16 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
+main_keyboard = types.ReplyKeyboardMarkup()
+main_keyboard.add(types.KeyboardButton('😽🙀Котик'))
+
+
 
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     text = 'Прівіт, радий тебе бачити!\n\n' \
             'Якщо ти хочеш дізнатися, що я вмію, то напиши /help'
-    await message.reply(text)
+    await message.reply(text, reply_markup=main_keyboard)
 
     
 @dp.message_handler(commands=['help'])
@@ -57,11 +61,11 @@ async def get_media_photo(message: types.Message):
 
 @dp.message_handler()
 async def echo(message: types.Message):
-    if message.text.lower() == 'котик':
+    if message.text.lower() in ('котик','😽🙀котик'):
         list_of_photos = os.listdir('photos')
         photo = random.choice(list_of_photos)
         await message.answer_photo(types.InputFile(f'photos/{photo}'), caption='Котик')
-
+    
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
     
