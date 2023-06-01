@@ -1,3 +1,4 @@
+import os
 import logging
 import random
 
@@ -29,14 +30,37 @@ async def help_command(message: types.Message):
 
 @dp.message_handler(content_types=['photo'])    
 async def photo_handler(message: types.Message):
-    print(message.photo)
+    # print(message.photo)
     await message.reply_photo(message.photo[-1].file_id)
+    await bot.download_file_by_id(message.photo[-1].file_id, f'photos/{message.photo[-1].file_unique_id}_{message.from_user.username}.jpg')
+       
+@dp.message_handler(commands=['get_photos'])
+async def get_photos(message: types.Message):
+    list_of_photos = os.listdir('photos')
+    print(list_of_photos)
+    for photo in list_of_photos:
+        name = photo.split('_')[1][:-4]
+        with open(f'photos/{photo}', 'rb') as file:
+            await message.reply_photo(file, f'Автор: {name}')
+
+@dp.message_handler(commands=['get_media_photo'])
+async def get_media_photo(message: types.Message):
+    media = types.MediaGroup()
+    list_of_photos = os.listdir('photos')
+    random.shuffle(list_of_photos)
+    for photo in list_of_photos[:10]:
+        name = photo.split('_')[1][:-4]
+        media.attach_photo(types.InputFile(f'photos/{photo}'),f'Автор: {name}')
+    await message.answer_media_group(media=media)
     
 
-    
+
 @dp.message_handler()
 async def echo(message: types.Message):
-    print(message)
+    if message.text.lower() == 'котик':
+        list_of_photos = os.listdir('photos')
+        photo = random.choice(list_of_photos)
+        await message.answer_photo(types.InputFile(f'photos/{photo}'), caption='Котик')
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
